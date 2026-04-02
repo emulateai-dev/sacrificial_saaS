@@ -2,19 +2,23 @@ import { getEnv } from "./env";
 import { useAuthStore } from "../stores/authStore";
 
 function resolveApiBaseUrl() {
-  const configured = getEnv("VITE_API_BASE_URL");
-  if (configured) return configured.replace(/\/$/, "");
+  const external = getEnv("VITE_API_BASE_URL_EXTERNAL");
+  const docker = getEnv("VITE_API_BASE_URL_DOCKER");
 
   if (typeof window !== "undefined") {
     const { hostname } = window.location;
     if (hostname === "localhost" || hostname === "127.0.0.1") {
+      if (external) return external.replace(/\/$/, "");
       return "http://localhost:8000";
     }
+
+    if (docker) return docker.replace(/\/$/, "");
+
     // Fallback for IP-based or other hostname access
     return `${window.location.protocol}//${hostname}:8000`;
   }
 
-  throw new Error("Missing VITE_API_BASE_URL");
+  throw new Error("Missing VITE_API_BASE_URL_EXTERNAL/VITE_API_BASE_URL_DOCKER");
 }
 
 const API_BASE_URL = resolveApiBaseUrl();

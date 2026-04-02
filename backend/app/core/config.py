@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_pass: str = ""
+    default_user_email: str = ""
+    default_user_password: str = ""
+    default_user_name: str = "Default User"
 
     @property
     def cors_origin_list(self) -> list[str]:
