@@ -8,6 +8,11 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - targetapp_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - dtx-net
     profiles: ["saas", "all"]
@@ -26,9 +31,16 @@ services:
       RAZORPAY_KEY_SECRET: ${SAC_RAZORPAY_KEY_SECRET:-}
       RAZORPAY_WEBHOOK_SECRET: ${SAC_RAZORPAY_WEBHOOK_SECRET:-}
     depends_on:
-      - saas_db
+      saas_db:
+        condition: service_started
     ports:
       - "${SAAS_BACKEND_PORT:-18000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health", "||", "exit", "1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - dtx-net
     profiles: ["saas", "all"]
@@ -47,7 +59,8 @@ services:
     ports:
       - "${SAAS_FRONTEND_PORT:-13378}:5173"
     depends_on:
-      - saas_backend
+      saas_backend:
+        condition: service_healthy
     networks:
       - dtx-net
     profiles: ["saas", "all"]
