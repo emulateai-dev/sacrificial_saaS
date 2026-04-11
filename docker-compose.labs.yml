@@ -10,6 +10,7 @@ services:
       - targetapp_db:/var/lib/postgresql/data
     networks:
       - dtx-net
+    profiles: ["saas", "all"]
 
   saas_backend:
     build:
@@ -30,6 +31,7 @@ services:
       - "${SAAS_BACKEND_PORT:-18000}:8000"
     networks:
       - dtx-net
+    profiles: ["saas", "all"]
 
   saas_frontend:
     image: node:24-alpine
@@ -47,6 +49,7 @@ services:
       - saas_backend
     networks:
       - dtx-net
+    profiles: ["saas", "all"]
 
 networks:
   dtx-net:
