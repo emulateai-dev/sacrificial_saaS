@@ -42,6 +42,7 @@ services:
     environment:
       VITE_API_BASE_URL: ${SAC_VITE_API_BASE_URL_DOCKER:-}
       VITE_RAZORPAY_KEY_ID: ${SAC_VITE_RAZORPAY_KEY_ID:-}
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
     ports:
       - "${SAAS_FRONTEND_PORT:-13378}:5173"
