@@ -1,0 +1,57 @@
+services:
+  saas_db:
+    image: postgres:16
+    container_name: dtx-copen-labs-saas-db
+    environment:
+      POSTGRES_DB: targetapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - targetapp_db:/var/lib/postgresql/data
+    networks:
+      - dtx-net
+
+  saas_backend:
+    build:
+      context: ./backend
+    container_name: dtx-copen-labs-saas-backend
+    environment:
+      DATABASE_URL: ${SAC_DATABASE_URL:-}
+      SECRET_KEY: ${SAC_SECRET_KEY:-}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${SAC_ACCESS_TOKEN_EXPIRE_MINUTES:-}
+      DB_AUTO_CREATE: ${SAC_DB_AUTO_CREATE:-}
+      CORS_ORIGINS: ${SAC_CORS_ORIGINS:-}
+      RAZORPAY_KEY_ID: ${SAC_RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${SAC_RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${SAC_RAZORPAY_WEBHOOK_SECRET:-}
+    depends_on:
+      - saas_db
+    ports:
+      - "${SAAS_BACKEND_PORT:-18000}:8000"
+    networks:
+      - dtx-net
+
+  saas_frontend:
+    image: node:24-alpine
+    container_name: dtx-copen-labs-saas-frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    environment:
+      VITE_API_BASE_URL: ${SAC_VITE_API_BASE_URL_DOCKER:-}
+      VITE_RAZORPAY_KEY_ID: ${SAC_VITE_RAZORPAY_KEY_ID:-}
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "${SAAS_FRONTEND_PORT:-13378}:5173"
+    depends_on:
+      - saas_backend
+    networks:
+      - dtx-net
+
+networks:
+  dtx-net:
+    external: true
+    name: dtx-net
+
+volumes:
+  targetapp_db:
