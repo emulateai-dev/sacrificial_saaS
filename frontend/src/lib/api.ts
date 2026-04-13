@@ -7,15 +7,17 @@ function resolveApiBaseUrl() {
 
   if (typeof window !== "undefined") {
     const { hostname } = window.location;
+    
+    // In browser, always prefer EXTERNAL URL if available
+    if (external) return external.replace(/\/$/, "");
+    
+    // Fallback logic
     if (hostname === "localhost" || hostname === "127.0.0.1") {
-      if (external) return external.replace(/\/$/, "");
-      return "http://localhost:8000";
+      return "http://localhost:18000";
     }
 
-    if (docker) return docker.replace(/\/$/, "");
-
     // Fallback for IP-based or other hostname access
-    return `${window.location.protocol}//${hostname}:8000`;
+    return `${window.location.protocol}//${hostname}:18000`;
   }
 
   throw new Error("Missing VITE_API_BASE_URL_EXTERNAL/VITE_API_BASE_URL_DOCKER");
